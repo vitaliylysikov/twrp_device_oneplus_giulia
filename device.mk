@@ -24,6 +24,12 @@ BOARD_SHIPPING_API_LEVEL := 35
 PRODUCT_SHIPPING_API_LEVEL := 35
 PPRODUCT_TARGET_VNDK_VERSION := 35
 
+# Fastbootd
+PRODUCT_PACKAGES += \
+    android.hardware.fastboot@1.1-impl-mock \
+    android.hardware.fastboot@1.0-impl-mock.recovery \
+    fastbootd
+
 # Kernel
 PRODUCT_OTA_ENFORCE_VINTF_KERNEL_REQUIREMENTS := false
 PRODUCT_ENABLE_UFFD_GC := true

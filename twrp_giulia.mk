@@ -6,13 +6,6 @@
 
 DEVICE_PATH := device/oneplus/giulia
 
-# Inherit from common AOSP config
-$(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
-$(call inherit-product, $(SRC_TARGET_DIR)/product/base.mk)
-
-# Inherit some common TWRP stuff.
-$(call inherit-product, vendor/twrp/config/common.mk)
-
 # Enable Virtual A/B
 $(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota/vabc_features.mk)
 PRODUCT_VIRTUAL_AB_COMPRESSION_METHOD := zstd
@@ -41,5 +34,3 @@ PRODUCT_MANUFACTURER := OnePlus
 TW_STATUS_ICONS_ALIGN := center
 TW_Y_OFFSET := 111
 TW_H_OFFSET := -111
-
-PRODUCT_GMS_CLIENTID_BASE := android-oneplus

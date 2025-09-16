@@ -10,8 +10,7 @@ LOGFILE=/tmp/recovery.log
 #
 # If you want to force setting of osver and patchlevel to the system/vendor version,
 # set the below prop in init.recovery "on init" to trigger the override function
-check_setpatch_override()
-{
+check_setpatch_override() {
 	setpatch_prop=$(getprop $SCRIPTNAME.setpatch)
 	if [ -z "$setpatch_prop" ]; then
 		SETPATCH_OVERRIDE=false
@@ -49,30 +48,28 @@ fi
 # 2 Temp Mount Failure
 
 # Function for logging to the recovery log
-log_print()
-{
+log_print() {
 	# 0 = Error; 1 = Information; 2 = Debugging
 	case $1 in
-		0|error)
-			LOG_LEVEL="E"
-			;;
-		1|info)
-			LOG_LEVEL="I"
-			;;
-		2|debug)
-			LOG_LEVEL="DEBUG"
-			;;
-		*)
-			LOG_LEVEL="UNKNOWN"
-			;;
+	0 | error)
+		LOG_LEVEL="E"
+		;;
+	1 | info)
+		LOG_LEVEL="I"
+		;;
+	2 | debug)
+		LOG_LEVEL="DEBUG"
+		;;
+	*)
+		LOG_LEVEL="UNKNOWN"
+		;;
 	esac
 	if [ $__VERBOSE -ge "$1" ]; then
-		echo "$LOG_LEVEL:$SCRIPTNAME::$2" >> "$LOGFILE"
+		echo "$LOG_LEVEL:$SCRIPTNAME::$2" >>"$LOGFILE"
 	fi
 }
 
-relink()
-{
+relink() {
 	log_print 2 "Updating linker path for $1..."
 	blobs=$(find "$1" -type f -exec echo '{}' \;)
 	if [ -n "$blobs" ]; then
@@ -80,7 +77,7 @@ relink()
 			fname=$(basename "$source")
 			target="/sbin/$fname"
 			log_print 2 "Relinking $source to $target..."
-			sed 's|/system/bin/linker|///////sbin/linker|' "$source" > "$target"
+			sed 's|/system/bin/linker|///////sbin/linker|' "$source" >"$target"
 			chmod 755 "$target"
 		done
 	else
@@ -88,8 +85,7 @@ relink()
 	fi
 }
 
-finish()
-{
+finish() {
 	if [ "$SETPATCH" = "true" ]; then
 		is_system_mounted=$(getprop $SCRIPTNAME.system_mounted)
 		if [ "$is_system_mounted" = 1 ]; then
@@ -112,8 +108,7 @@ finish()
 	exit 0
 }
 
-finish_error()
-{
+finish_error() {
 	if [ "$SETPATCH" = "true" ]; then
 		is_system_mounted=$(getprop $SCRIPTNAME.system_mounted)
 		if [ "$is_system_mounted" = 1 ]; then
@@ -135,21 +130,18 @@ finish_error()
 	exit 2
 }
 
-osver_default_value()
-{
+osver_default_value() {
 	osver_default=$(grep "$1=" /"$DEFAULTPROP")
 	log_print 2 "$DEFAULTPROP value: $osver_default"
 }
 
-patchlevel_default_value()
-{
+patchlevel_default_value() {
 	patchlevel_default=$(grep "$1=" /"$DEFAULTPROP")
 	log_print 2 "$DEFAULTPROP value: $patchlevel_default"
 	finish
 }
 
-update_default_values()
-{
+update_default_values() {
 	if [ -z "$1" ]; then
 		log_print 0 "No $3. Checking original props..."
 		if [ -n "$2" ]; then
@@ -157,7 +149,7 @@ update_default_values()
 			log_print 2 "Setting $3 to original value..."
 			$setprop_bin "$4" "$2"
 			log_print 2 "Updating $DEFAULTPROP with Original $3..."
-			echo "$4=$2" >> "/$DEFAULTPROP";
+			echo "$4=$2" >>"/$DEFAULTPROP"
 			$5 "$4"
 		else
 			log_print 0 "No Original $3 found. Setting default value..."
@@ -165,7 +157,7 @@ update_default_values()
 			patchlevel=$patchlevel_twrp
 			$setprop_bin "$4" "$1"
 			log_print 2 "Updating $DEFAULTPROP with default $3..."
-			echo "$4=$1" >> "/$DEFAULTPROP";
+			echo "$4=$1" >>"/$DEFAULTPROP"
 			$5 "$4"
 		fi
 	else
@@ -174,16 +166,17 @@ update_default_values()
 	fi
 }
 
-check_dynamic()
-{
+check_dynamic() {
 	dynamic_partitions=$(getprop ro.boot.dynamic_partitions)
 	if [ "$dynamic_partitions" = "true" ]; then
-		unset suffix
+		if [[ ! -e "/dev/block/mapper/system$suffix" && ! -e "/dev/block/mapper/vendor$suffix" ]]; then
+			log_print 1 "/dev/block/mapper/system$suffix and /dev/block/mapper/vendor$suffix not Found! unset suffix"
+			unset suffix
+		fi
 	fi
 }
 
-check_encrypt()
-{
+check_encrypt() {
 	if [ "$sdkver" -ge 26 ]; then
 		sleep 1
 	fi
@@ -198,8 +191,7 @@ check_encrypt()
 	fi
 }
 
-check_fastboot_boot()
-{
+check_fastboot_boot() {
 	is_fastboot_boot=$(getprop ro.boot.fastboot)
 	twrpfastboot=$(grep twrpfastboot /proc/cmdline)
 	skip_initramfs_present=$(grep skip_initramfs /proc/cmdline)
@@ -220,8 +212,7 @@ check_fastboot_boot()
 	fi
 }
 
-check_resetprop()
-{
+check_resetprop() {
 	if [ -e /system/bin/resetprop ] || [ -e /sbin/resetprop ]; then
 		log_print 2 "Resetprop binary found!"
 		setprop_bin=resetprop
@@ -231,8 +222,7 @@ check_resetprop()
 	fi
 }
 
-temp_mount()
-{
+temp_mount() {
 	is_mounted=$(ls -A "$1" 2>/dev/null)
 	if [ -n "$is_mounted" ]; then
 		log_print 1 "$2 already mounted."
@@ -279,13 +269,13 @@ if [ "$sdkver" -lt 29 ]; then
 	venlib="/vendor/lib"
 	abi=$(getprop ro.product.cpu.abi)
 	case "$abi" in
-		*64*)
-			venlib="/vendor/lib64"
-			log_print 2 "Device is 64-bit. Vendor library path set to $venlib."
-			;;
-		*)
-			log_print 2 "Device is 32-bit. Vendor library path set to $venlib."
-			;;
+	*64*)
+		venlib="/vendor/lib64"
+		log_print 2 "Device is 64-bit. Vendor library path set to $venlib."
+		;;
+	*)
+		log_print 2 "Device is 32-bit. Vendor library path set to $venlib."
+		;;
 	esac
 	relink "$venbin"
 	relink "$venlib/libQSEEComAPI.so"
@@ -315,9 +305,9 @@ if [ -e "$recpath" ]; then
 	fi
 else
 	log_print 2 "No recovery partition found."
-    if [ "$SETPATCH_OVERRIDE" = "false" ]; then
-        SETPATCH=true
-    fi
+	if [ "$SETPATCH_OVERRIDE" = "false" ]; then
+		SETPATCH=true
+	fi
 fi
 
 if [ "$sdkver" -ge 26 ]; then
@@ -339,28 +329,36 @@ if [ "$sdkver" -ge 26 ]; then
 
 		BUILDPROP="build.prop"
 		TEMPSYS=/s
-		syspath="/dev/block/bootdevice/by-name/system$suffix"
+		syspath="/dev/block/mapper/system$suffix"
+		if [ ! -e "/dev/block/mapper/system$suffix" ]; then
+			log_print 2 "No system mapper found. Trying by-name..."
+			syspath="/dev/block/bootdevice/by-name/system$suffix"
+		fi
 
 		if [ "$sdkver" -ge 29 ]; then
 			SAR=true
 			MNT_VENDOR=true
 			TEMPVEN=/v
-			venpath="/dev/block/bootdevice/by-name/vendor$suffix"
+			venpath="/dev/block/mapper/vendor$suffix"
+			if [ ! -e "/dev/block/mapper/vendor$suffix" ]; then
+				log_print 2 "No vendor mapper found. Trying by-name..."
+				venpath="/dev/block/bootdevice/by-name/vendor$suffix"
+			fi
 
 			temp_mount "$TEMPVEN" "vendor" "$venpath"
 
 			if [ -f "$TEMPVEN/$BUILDPROP" ]; then
 				log_print 2 "Vendor Build.prop exists! Reading vendor properties from build.prop..."
-				vensdkver=$(grep -i -m 1 'ro.vendor.build.version.sdk=' "$TEMPVEN/$BUILDPROP"  | cut -f2 -d'=' -s)
+				vensdkver=$(grep -i -m 1 'ro.vendor.build.version.sdk=' "$TEMPVEN/$BUILDPROP" | cut -f2 -d'=' -s)
 				log_print 2 "Current vendor Android SDK version: $vensdkver"
 				if [ "$vensdkver" -gt 25 ]; then
 					log_print 2 "Current vendor is Oreo or above. Proceed with setting vendor security patch level..."
 					venpatchlevel=$(getprop ro.vendor.build.security_patch)
 					log_print 2 "Current Vendor Security Patch Level: $venpatchlevel"
-					venpatchlevel_device=$(grep -i -m 1 'ro.vendor.build.security_patch=' "$TEMPVEN/$BUILDPROP"  | cut -f2 -d'=' -s)
+					venpatchlevel_device=$(grep -i -m 1 'ro.vendor.build.security_patch=' "$TEMPVEN/$BUILDPROP" | cut -f2 -d'=' -s)
 					if ! [ "$venpatchlevel" = "venpatchlevel_device" ]; then
 						$setprop_bin "ro.vendor.build.security_patch" "$venpatchlevel_device"
-						sed -i "s/ro.vendor.build.security_patch=.*/ro.vendor.build.security_patch=""$venpatchlevel_device""/g" "/$DEFAULTPROP" ;
+						sed -i "s/ro.vendor.build.security_patch=.*/ro.vendor.build.security_patch=""$venpatchlevel_device""/g" "/$DEFAULTPROP"
 						venpatchlevel_new=$(getprop ro.vendor.build.security_patch)
 						venpatchlevel_default=$(grep -i -m 1 'ro.vendor.build.security_patch=' /$DEFAULTPROP | cut -f2 -d'=' -s)
 						if [ "$venpatchlevel_device" = "$venpatchlevel_new" ]; then
@@ -376,7 +374,7 @@ if [ "$sdkver" -ge 26 ]; then
 					else
 						venpatchlevel_default=$(grep -i -m 1 'ro.vendor.build.security_patch=' /$DEFAULTPROP | cut -f2 -d'=' -s)
 						if ! [ "$venpatchlevel_device" = "$venpatchlevel_default" ]; then
-							sed -i "s/ro.vendor.build.security_patch=.*/ro.vendor.build.security_patch=""$venpatchlevel_device""/g" "/$DEFAULTPROP" ;
+							sed -i "s/ro.vendor.build.security_patch=.*/ro.vendor.build.security_patch=""$venpatchlevel_device""/g" "/$DEFAULTPROP"
 						fi
 					fi
 				else
@@ -394,18 +392,23 @@ if [ "$sdkver" -ge 26 ]; then
 		fi
 
 		temp_mount "$TEMPSYS" "system" "$syspath"
+		if [ ! -f "$TEMPSYS/$BUILDPROP" ]; then
+			log_print 2 "/s Build.prop does not exist! Trying /system_root..."
+			TEMPSYS=/system_root
+			temp_mount "$TEMPSYS" "system" "$syspath"
+		fi
 
 		if [ -f "$TEMPSYS/$BUILDPROP" ]; then
 			log_print 2 "Build.prop exists! Reading system properties from build.prop..."
-			sdkver=$(grep -i -m 1 'ro.build.version.sdk=' "$TEMPSYS/$BUILDPROP"  | cut -f2 -d'=' -s)
+			sdkver=$(grep -i -m 1 'ro.build.version.sdk=' "$TEMPSYS/$BUILDPROP" | cut -f2 -d'=' -s)
 			log_print 2 "Current system Android SDK version: $sdkver"
 			if [ "$sdkver" -gt 25 ]; then
 				log_print 2 "Current system is Oreo or above. Proceed with setting OS Version & Security Patch Level..."
 				log_print 2 "Current OS Version: $osver"
-				osver=$(grep -i -m 1 'ro.build.version.release=' "$TEMPSYS/$BUILDPROP"  | cut -f2 -d'=' -s)
+				osver=$(grep -i -m 1 'ro.build.version.release=' "$TEMPSYS/$BUILDPROP" | cut -f2 -d'=' -s)
 				if [ -n "$osver" ]; then
 					$setprop_bin "ro.build.version.release" "$osver"
-					sed -i "s/ro.build.version.release=.*/ro.build.version.release=""$osver""/g" "/$DEFAULTPROP" ;
+					sed -i "s/ro.build.version.release=.*/ro.build.version.release=""$osver""/g" "/$DEFAULTPROP"
 					osver_new=$(getprop ro.build.version.release)
 					osver_default=$(grep -i -m 1 'ro.build.version.release=' /$DEFAULTPROP | cut -f2 -d'=' -s)
 					if [ "$osver" = "$osver_new" ]; then
@@ -420,10 +423,10 @@ if [ "$sdkver" -ge 26 ]; then
 					fi
 				fi
 				log_print 2 "Current Security Patch Level: $patchlevel"
-				patchlevel=$(grep -i -m 1 'ro.build.version.security_patch=' "$TEMPSYS/$BUILDPROP"  | cut -f2 -d'=' -s)
+				patchlevel=$(grep -i -m 1 'ro.build.version.security_patch=' "$TEMPSYS/$BUILDPROP" | cut -f2 -d'=' -s)
 				if [ -n "$patchlevel" ]; then
 					$setprop_bin "ro.build.version.security_patch" "$patchlevel"
-					sed -i "s/ro.build.version.security_patch=.*/ro.build.version.security_patch=""$patchlevel""/g" "/$DEFAULTPROP" ;
+					sed -i "s/ro.build.version.security_patch=.*/ro.build.version.security_patch=""$patchlevel""/g" "/$DEFAULTPROP"
 					patchlevel_new=$(getprop ro.build.version.security_patch)
 					patchlevel_default=$(grep -i -m 1 'ro.build.version.security_patch=' /$DEFAULTPROP | cut -f2 -d'=' -s)
 					if [ "$patchlevel" = "$patchlevel_new" ]; then
@@ -442,6 +445,9 @@ if [ "$sdkver" -ge 26 ]; then
 				log_print 2 "Current vendor is Nougat or older. Skipping vendor security patch level setting..."
 				finish
 			fi
+		else
+			TEMPSYS=/s
+			finish_error
 		fi
 	fi
 else

@@ -26,7 +26,7 @@
 #
 #
 # Changes from Qualcomm Innovation Center are provided under the following license:
-# Copyright (c) 2022-2023, 2025 Qualcomm Innovation Center, Inc. All rights reserved.
+# Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted (subject to the limitations in the
@@ -59,10 +59,20 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
+#Import rc file
+import /vendor/etc/ueventd.qcom.userdebug.rc
+
+
 # Firmware directory Path
 # Below macro will be read by uevent and path will
 # be added to search path for firmware loading
-firmware_directories /vendor/firmware_mnt/image/
+# ifndef OPLUS_FEATURE_WIFI_BDF
+# fangzhijun@CONNECTIVITY.WIFI.HARDWARE.BDF.5719240 , 2023/06/13,
+# Modify for: multi projects using different bdf, adding persist into firmware_directories
+# firmware_directories /vendor/firmware_mnt/image/
+# else /* OPLUS_FEATURE_WIFI_BDF */
+firmware_directories /mnt/vendor/persist/copy/ /odm/etc/wifi/ /mnt/vendor/persist/ /vendor/firmware_mnt/image/
+# endif /* OPLUS_FEATURE_WIFI_BDF */
 
 subsystem dma_heap
     devname uevent_devpath
@@ -111,9 +121,6 @@ subsystem mem_buf_vm
 
 #permissions for UFS RPMB BSG device node
 /dev/0:0:0:49476          0600   system     system
-
-#permissions for eMMC RPMB device node
-/dev/mmcblk0rpmb          0600   system     system
 
 #permissions for GPT listener on LUN4
 /dev/0:0:0:4              0600   system     root
@@ -381,6 +388,14 @@ subsystem mem_buf_vm
 /sys/devices/soc/600000.qcom,pcie/pci0000:00/0000:00:00.0/0000:01:00.0/net/wlan0/queues/rx-* rps_cpus 0660 system system
 /sys/devices/soc/600000.qcom,pcie/pci0000:00/0000:00:00.0/0000:01:00.0/net/p2p0/queues/rx-* rps_cpus 0660 system system
 
+# wigig
+/sys/bus/pci/drivers/wil6210* 0000:01:00.0/wil6210/fst_link_loss 0660 wifi wifi
+/sys/bus/pci/drivers/wil6210* 0000:01:00.0/wil6210/thermal_throttling 0660 system system
+/sys/bus/pci/drivers/wil6210* 0000:01:00.0/wil6210/snr_thresh 0660 wifi wifi
+/sys/bus/pci/drivers/wil6210* 0000:01:00.0/net/wigig0/queues/rx-0/rps_cpus 0660 system system
+/sys/bus/pci/drivers/wil6210* 0000:01:00.0/net/wigig0/gro_flush_timeout 0660 system system
+/sys/devices/virtual/net/bond0 queues/rx-0/rps_cpus 0660 system system
+
 #nfc permissions
 /dev/nfc-nci              0660    nfc         nfc
 /dev/nq-nci               0660    nfc         nfc
@@ -389,7 +404,6 @@ subsystem mem_buf_vm
 
 # eSE permissions
 /dev/st54spi_gpio         0660   system     system
-/dev/stsafe320_gpio       0660   system     system
 
 # UIO devices
 /dev/uio0                 0660   system     system
@@ -431,7 +445,6 @@ subsystem mem_buf_vm
 /dev/block/platform/soc/7c4000.sdhci/by-name/frp        0600   system     system
 /dev/block/platform/soc/4744000.sdhci/by-name/frp       0600   system     system
 /dev/block/platform/soc/4804000.ufshc/by-name/frp       0600   system     system
-/dev/block/platform/soc/b24000.sdhci/by-name/frp        0600   system     system
 
 # This is temporary while using SD card for initial bring-up
 /dev/block/platform/soc/8804000.sdhci/by-name/frp       0600   system     system
@@ -446,18 +459,36 @@ subsystem mem_buf_vm
 /sys/class/leds/red      repeat       0640    system    system
 /sys/class/leds/red      hw_pattern   0640    system    system
 /sys/class/leds/red      trigger      0640    system    system
+/sys/class/leds/red      brightness   0664    system    system
+/sys/class/leds/red      tr1          0664    system    system
+/sys/class/leds/red      tf1          0664    system    system
+/sys/class/leds/red      toff         0664    system    system
+/sys/class/leds/red      ton          0664    system    system
+/sys/class/leds/red      support      0664    system    system
 /sys/class/leds/green    delay_on     0640    system    system
 /sys/class/leds/green    delay_off    0640    system    system
 /sys/class/leds/green    breath       0640    system    system
 /sys/class/leds/green    trigger      0640    system    system
 /sys/class/leds/green    repeat       0640    system    system
 /sys/class/leds/green    hw_pattern   0640    system    system
+/sys/class/leds/green    brightness   0664    system    system
+/sys/class/leds/green    tr1          0664    system    system
+/sys/class/leds/green    tf1          0664    system    system
+/sys/class/leds/green    toff         0664    system    system
+/sys/class/leds/green    ton          0664    system    system
+/sys/class/leds/green    support      0664    system    system
 /sys/class/leds/blue     delay_on     0640    system    system
 /sys/class/leds/blue     delay_off    0640    system    system
 /sys/class/leds/blue     breath       0640    system    system
 /sys/class/leds/blue     trigger      0640    system    system
 /sys/class/leds/blue     repeat       0640    system    system
 /sys/class/leds/blue     hw_pattern   0640    system    system
+/sys/class/leds/blue     brightness   0664    system    system
+/sys/class/leds/blue     tr1          0664    system    system
+/sys/class/leds/blue     tf1          0664    system    system
+/sys/class/leds/blue     toff         0664    system    system
+/sys/class/leds/blue     ton          0664    system    system
+/sys/class/leds/blue     support      0664    system    system
 
 # NPU device
 /dev/msm_npu             0644   system     system
@@ -526,9 +557,9 @@ subsystem mem_buf_vm
 /sys/class/graphics/fb0     modes                    0664    system  graphics
 /sys/class/graphics/fb0     mode                     0664    system  graphics
 /sys/class/graphics/fb0     msm_cmd_autorefresh_en   0664    system  graphics
+*/
 
 /sys/devices/platform/soc/ae00000.qcom,mdss_mdp power/control 0664 system graphics
-/sys/devices/platform/soc/9800000.qcom,mdss_mdp power/control 0664 system graphics
 
 #asm330 sensor
 #common sensors files
@@ -597,8 +628,8 @@ subsystem mem_buf_vm
 #Virtualization Attributes
 /dev/gunyah                 0666   root     root
 
+# Tango 32-bit kernel support
+/dev/tango32                0666   system     system
+
 # Q2SPI UWB device
 /dev/q2spiuwb    0660    uwb    uwb
-
-# SPI UWB device
-/dev/spiuwb    0660    uwb    uwb

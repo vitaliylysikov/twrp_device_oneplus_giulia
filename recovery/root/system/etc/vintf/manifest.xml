@@ -1,9 +1,9 @@
 <!--
     Input:
         system/libhidl/vintfdata/manifest.xml
-        device/oneplus/sm8650-common/framework_manifest.xml
+        device/qcom/qssi_64/framework_manifest.xml
 -->
-<manifest version="9.0" type="framework">
+<manifest version="8.0" type="framework">
     <hal format="hidl" max-level="6">
         <name>android.frameworks.displayservice</name>
         <transport>hwbinder</transport>
@@ -42,19 +42,23 @@
         <name>netutils-wrapper</name>
         <version>1.0</version>
     </hal>
-    <hal format="hidl">
+    <hal format="hidl" max-level="8">
         <name>vendor.qti.hardware.qccsyshal</name>
         <transport>hwbinder</transport>
         <fqname>@1.2::IQccsyshal/qccsyshal</fqname>
+    </hal>
+    <hal format="hidl" max-level="6">
+        <name>vendor.qti.hardware.radio.atcmdfwd</name>
+        <transport>hwbinder</transport>
+        <fqname>@1.0::IAtCmdFwd/AtCmdFwdService</fqname>
+    </hal>
+    <hal format="hidl" max-level="8">
+        <name>vendor.qti.hardware.systemhelper</name>
+        <transport>hwbinder</transport>
+        <fqname>@1.0::ISystemEvent/default</fqname>
+        <fqname>@1.0::ISystemResource/default</fqname>
     </hal>
     <system-sdk>
         <version>29</version>
         <version>30</version>
         <version>31</version>
-        <version>32</version>
-        <version>33</version>
-        <version>34</version>
-        <version>35</version>
-        <version>36</version>
-    </system-sdk>
-</manifest>

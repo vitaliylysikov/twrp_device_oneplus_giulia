@@ -7,13 +7,6 @@
 # Building with minimal manifest
 ALLOW_MISSING_DEPENDENCIES := true
 
-# Rules
-BUILD_BROKEN_DUP_RULES := true
-TARGET_USES_WLAN := false
-BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
-BUILD_BROKEN_NINJA_USES_ENV_VARS += RTIC_MPGEN
-BUILD_BROKEN_PLUGIN_VALIDATION := soong-libaosprecovery_defaults soong-libguitwrp_defaults soong-libminuitwrp_defaults soong-vold_defaults
-
 # Architecture
 TARGET_ARCH := arm64
 TARGET_ARCH_VARIANT := armv8-a
@@ -23,9 +16,6 @@ TARGET_CPU_VARIANT := kryo
 # Power
 ENABLE_CPUSETS := true
 ENABLE_SCHEDBOOST := true
-
-# Battery
-TW_CUSTOM_BATTERY_PATH := "/sys/class/power_supply/battery"
 
 # Bootloader
 PRODUCT_PLATFORM := pineapple

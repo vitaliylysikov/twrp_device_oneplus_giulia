@@ -22,6 +22,7 @@
 /dtbo           emmc    /dev/block/by-name/dtbo                   flags=slotselect;display="dtbo";backup;flashimg
 /vbmeta         emmc    /dev/block/by-name/vbmeta                 flags=slotselect;display="vbmeta";backup;flashimg
 /vbmeta_system  emmc    /dev/block/by-name/vbmeta_system          flags=slotselect;display="vbmeta_system";backup;flashimg
+/vbmeta_vendor  emmc    /dev/block/by-name/vbmeta_vendor          flags=slotselect;display="vbmeta_vendor";backup;flashimg
 
 # Persistent Firmware & Properties
 /firmware       vfat    /dev/block/by-name/modem                  flags=slotselect;display="Firmware";mounttodecrypt;fsflags="ro,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337,context=u:object_r:firmware_file:s0"
